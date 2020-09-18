@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Cliente {
     private String nome;
@@ -48,43 +50,36 @@ public class Cliente {
         this.nome = nome;
     }
 
+    public static double writeIn(PrintWriter gravador, Cliente cliente, double total, String nome, String path) throws IOException {
+        List<Item> bruh;
+
+        switch (nome){
+            case "Pratos" -> bruh = cliente.getPratos();
+            case "Bebidas" -> bruh = cliente.getBebidas();
+            case "Vinhos" -> bruh = cliente.getVinhos();
+            default -> throw new IllegalStateException("Unexpected value: " + nome);
+        }
+        if (bruh != null){
+            gravador.print(nome + ":");
+            for (Item item : bruh) {
+                total += Cardapio.read(path).stream().filter(e -> e.getNome().equals(item.getNome())).mapToDouble(Item::getPreco).sum();
+                if (bruh.indexOf(item) == (bruh.size() -1)) gravador.print(item.getNome());
+                else gravador.print(item.getNome() + ";");
+            }
+        }
+        gravador.print("\n");
+        return total;
+    }
+
     public static void addPedido(Cliente cliente) throws IOException {
         File output = new File("C:\\Users\\Vinic\\Desktop\\Nova pasta\\pedidos\\" + cliente.getNome() + ".txt");
         PrintWriter gravador = new PrintWriter(String.valueOf(output));
         gravador.println("Cliente:" + cliente.getNome());
         double total = 0;
 
-        if (cliente.getPratos() != null){
-            gravador.print("Pratos:");
-            for (Item item : cliente.getPratos()) {
-                total += Cardapio.read(Cardapio.pratoPath).stream().filter(e -> e.getNome().equals(item.getNome())).mapToDouble(Item::getPreco).sum();
-                if (cliente.getPratos().indexOf(item) == (cliente.getPratos().size() -1)) gravador.print(item.getNome());
-                else gravador.print(item.getNome() + ";");
-
-            }
-        }
-        gravador.print("\n");
-        if (cliente.getBebidas() != null) {
-            gravador.print("Bebidas:");
-            for (Item item : cliente.getBebidas()) {
-                total += Cardapio.read(Cardapio.bebidaPath).stream().filter(e -> e.getNome().equals(item.getNome())).mapToDouble(Item::getPreco).sum();
-                if (cliente.getBebidas().indexOf(item) == (cliente.getBebidas().size() - 1))
-                    gravador.append(item.getNome());
-                else gravador.print(item.getNome() + ";");
-                total += item.getPreco();
-            }
-        }
-        gravador.print("\n");
-        if (cliente.getVinhos() != null){
-            gravador.print("Vinhos:");
-            for (Item item : cliente.getVinhos()) {
-                total += Cardapio.read(Cardapio.vinhoPath).stream().filter(e -> e.getNome().equals(item.getNome())).mapToDouble(Item::getPreco).sum();
-                if (cliente.getVinhos().indexOf(item) == (cliente.getVinhos().size() -1)) gravador.print(item.getNome());
-                else gravador.print(item.getNome() + ";");
-
-            }
-        }
-        gravador.print("\n");
+        if (cliente.getPratos() != null) total += writeIn(gravador, cliente, total, "Pratos", Cardapio.pratoPath);
+        if (cliente.getBebidas() != null) total += writeIn(gravador, cliente, total, "Bebidas", Cardapio.bebidaPath);
+        if (cliente.getVinhos() != null) total += writeIn(gravador, cliente, total, "Vinhos", Cardapio.vinhoPath);
         gravador.println(cliente.getComplemento() == null ? "" :"Complemento:" + cliente.getComplemento());
         gravador.println("Total:" + total);
         gravador.close();
@@ -142,9 +137,12 @@ public class Cliente {
         int escolha = scanner.nextInt();
 
         switch (escolha) {
-            case 1 -> cliente.setPratos(Cardapio.menu(Cardapio.pratoPath));
-            case 2 -> cliente.setBebidas(Cardapio.menu(Cardapio.bebidaPath));
-            case 3 -> cliente.setVinhos(Cardapio.menu(Cardapio.vinhoPath));
+            case 1 -> cliente.setPratos(Stream.concat(cliente.getPratos().stream(), Cardapio.menu(Cardapio.pratoPath).stream())
+                    .collect(Collectors.toList()));
+            case 2 -> cliente.setBebidas(Stream.concat(cliente.getBebidas().stream(), Cardapio.menu(Cardapio.bebidaPath).stream())
+                    .collect(Collectors.toList()));
+            case 3 -> cliente.setVinhos(Stream.concat(cliente.getVinhos().stream(), Cardapio.menu(Cardapio.vinhoPath).stream())
+                    .collect(Collectors.toList()));
             default -> System.out.println("Hmm... Nada aqui");
         }
         addPedido(cliente);

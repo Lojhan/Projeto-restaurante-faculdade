@@ -6,7 +6,6 @@ public class Main {
     public static void main(String[]args) throws IOException {
         Cliente cliente = new Cliente();
         Scanner scanner = new Scanner(System.in);
-        Map<String, List<Item>> pedidoCompleto = new HashMap<>();
         System.out.println("Qual seu nome? ");
         cliente.setNome(scanner.nextLine());
         int escolha = 0;

@@ -24,7 +24,6 @@ public class Cardapio {
         Rewrite(cardapio, patch);
         return res;
     }
-
     public static String removeFromList(List<Item> cardapio, String patch) throws IOException {
         Scanner scanner = new Scanner(System.in);
         System.out.println("\n Remoção de Items (Digite \"cancelar\" para voltar)");
@@ -34,7 +33,6 @@ public class Cardapio {
         Rewrite(cardapio, patch);
         return nome;
     }
-
     public static String editItem(List<Item> cardapio, String patch) throws IOException {
         Scanner scanner = new Scanner(System.in);
         System.out.println("\n Edição de Items (Digite \"cancelar\" para voltar)");
@@ -50,7 +48,6 @@ public class Cardapio {
         Rewrite(cardapio, patch);
         return res;
     }
-
     public static void Rewrite(List<Item> cardapio, String patch) throws IOException {
         File output = new File(patch);
         PrintWriter gravador = new PrintWriter(String.valueOf(output));
@@ -63,7 +60,6 @@ public class Cardapio {
         }
         gravador.close();
     }
-
     public static void edit() throws IOException {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Qual cardápio você deseja editar?\nOu digite \"voltar\" para voltar ao menu principal");
@@ -77,7 +73,6 @@ public class Cardapio {
             };
         }
     }
-
     public static String crud(String patch) throws IOException {
         Scanner scanner = new Scanner(System.in);
         do {
@@ -94,7 +89,6 @@ public class Cardapio {
         } while (!escolha.equals("voltar"));
         return res;
     }
-
     public static List<Item> menu(String patch) throws IOException {
         Scanner scanner = new Scanner(System.in);
         List<Item> items = read(patch);
@@ -109,7 +103,6 @@ public class Cardapio {
             if (scanner.nextLine().equals("n")) return pedido;
         }
     }
-
     public static List<Item> read(String path) throws IOException {
         List<Item> items = new ArrayList<>();
         File file = new File(path);

@@ -50,56 +50,40 @@ public class Cliente {
         this.nome = nome;
     }
 
-    public static double writeIn(PrintWriter gravador, Cliente cliente, double total, String nome, String path) throws IOException {
-        List<Item> bruh;
+    public static double writeIn(PrintWriter gravador, List<Item> bruh, double total, String nome, String path) throws IOException {
 
-        switch (nome){
-            case "Pratos" -> bruh = cliente.getPratos();
-            case "Bebidas" -> bruh = cliente.getBebidas();
-            case "Vinhos" -> bruh = cliente.getVinhos();
-            default -> throw new IllegalStateException("Unexpected value: " + nome);
-        }
-        if (bruh != null){
-            gravador.print(nome + ":");
+        gravador.print(nome + ":");
             for (Item item : bruh) {
                 total += Cardapio.read(path).stream().filter(e -> e.getNome().equals(item.getNome())).mapToDouble(Item::getPreco).sum();
-                if (bruh.indexOf(item) == (bruh.size() -1)) gravador.print(item.getNome());
-                else gravador.print(item.getNome() + ";");
+                if (bruh.indexOf(item) == (bruh.size() -1)) gravador.print(item.getNome()); else gravador.print(item.getNome() + ";");
             }
-        }
         gravador.print("\n");
         return total;
     }
-
     public static void addPedido(Cliente cliente) throws IOException {
         File output = new File("C:\\Users\\Vinic\\Desktop\\Nova pasta\\pedidos\\" + cliente.getNome() + ".txt");
         PrintWriter gravador = new PrintWriter(String.valueOf(output));
         gravador.println("Cliente:" + cliente.getNome());
         double total = 0;
 
-        if (cliente.getPratos() != null) total += writeIn(gravador, cliente, total, "Pratos", Cardapio.pratoPath);
-        if (cliente.getBebidas() != null) total += writeIn(gravador, cliente, total, "Bebidas", Cardapio.bebidaPath);
-        if (cliente.getVinhos() != null) total += writeIn(gravador, cliente, total, "Vinhos", Cardapio.vinhoPath);
+        if (cliente.getPratos() != null) total += writeIn(gravador, cliente.getPratos(), total, "Pratos", Cardapio.pratoPath);
+        if (cliente.getBebidas() != null) total += writeIn(gravador, cliente.getBebidas(), total, "Bebidas", Cardapio.bebidaPath);
+        if (cliente.getVinhos() != null) total += writeIn(gravador, cliente.getVinhos(), total, "Vinhos", Cardapio.vinhoPath);
         gravador.println(cliente.getComplemento() == null ? "" :"Complemento:" + cliente.getComplemento());
         gravador.println("Total:" + total);
         gravador.close();
-        lernovamente(cliente);
-
     }
-
     public static String addComplemento(){
         Scanner scanner = new Scanner(System.in);
         scanner.nextLine();
         System.out.println("Digite o Complemento:");
         return scanner.nextLine();
     }
-
     public static void pedidos() {
         File directoryPath = new File("C:\\Users\\Vinic\\Desktop\\Nova pasta\\pedidos");
         File[] filesList = directoryPath.listFiles();
         for(File file : Objects.requireNonNull(filesList)) System.out.println(file.getName().split(".txt")[0]);
     }
-
     public static void lernovamente(Cliente pedido){
         if (!(pedido.getPratos() == null || pedido.getPratos().isEmpty())){System.out.println("Pratos:");for (Item element : pedido.getPratos()) System.out.println(element.getNome());}
         if(!(pedido.getBebidas() == null || pedido.getBebidas().isEmpty())){System.out.println("Bebidas:");for (Item element : pedido.getBebidas()) System.out.println(element.getNome());}
@@ -107,7 +91,6 @@ public class Cliente {
         System.out.println("Complemento:");System.out.println(pedido.getComplemento());
         System.out.println("Total: R$" + pedido.total);
     }
-
     public static void verPedido() throws IOException {
         String escolhac;
         Scanner scanner = new Scanner(System.in);
@@ -119,19 +102,13 @@ public class Cliente {
                 Cliente pedido = readpedido(escolhac);
                 assert pedido != null;
                 addPedido(pedido);
-                if (!(pedido.getPratos() == null || pedido.getPratos().isEmpty())){System.out.println("Pratos:");for (Item element : pedido.getPratos()) System.out.println(element.getNome());}
-                if(!(pedido.getBebidas() == null || pedido.getBebidas().isEmpty())){System.out.println("Bebidas:");for (Item element : pedido.getBebidas()) System.out.println(element.getNome());}
-                if(!(pedido.getVinhos() == null || pedido.getVinhos().isEmpty())){System.out.println("Vinhos:");for (Item element : pedido.getVinhos()) System.out.println(element.getNome());}
-                System.out.println("Complemento:");System.out.println(pedido.getComplemento());
-                System.out.println("Total: R$" + pedido.total);
+                lernovamente(pedido);
                 crud(pedido);
             }
         } while (!escolhac.equals("voltar"));
 
     }
-
     public static String addInPedido(Cliente cliente) throws IOException {
-        String res = null;
         System.out.println("O que deseja pedir? \n1. Pratos \n2. Bebidas \n3. Vinhos");
         Scanner scanner = new Scanner(System.in);
         int escolha = scanner.nextInt();
@@ -170,26 +147,25 @@ public class Cliente {
         addPedido(cliente);
         return nome;
     }
-
     public static void crud(Cliente pedido) throws IOException {
         Scanner scanner = new Scanner(System.in);
         String escolha;
-        String res = null;
+        String res = "";
         do {
-            System.out.println("Escolha uma função entre: \n1 Adicionar\n2 Remover\n3 Editar Complemento\n\"Ou digite \"voltar\" para voltar ao menu principal\"");
+            System.out.println("Escolha uma função entre: \n1 Adicionar\n2 Remover\n3 Editar Complemento\n4 Ler Pedido\n\"Ou digite \"voltar\" para voltar ao menu principal\"");
             escolha = scanner.nextLine();
             if (!escolha.equals("voltar")){
                 switch (escolha){
                     case "1" -> res = addInPedido(pedido);
                     case "2" -> res = removefromPedido(pedido);
                     case "3" -> res = editComplemento(pedido);
+                    case "4" -> lernovamente(pedido);
                     default -> res = null;
                 }
-                System.out.println( res == null ? "Item não encontrado" :"Alteração Realizada com sucesso!");
+                System.out.println( res == null ? "Essa função não existe" :"Alteração Realizada com sucesso!");
             }
         } while (!escolha.equals("voltar"));
     }
-
     public static List<Item> addToList(String[] items){
         List<Item> itemsInternos = new ArrayList<>();
         for (String s : items) {
@@ -199,7 +175,6 @@ public class Cliente {
         }
         return itemsInternos;
     }
-
     public static Cliente readpedido(String pedido) {
         Cliente cliente = new Cliente();
         try {
